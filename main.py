@@ -4,7 +4,6 @@ Created on Wed Jan 13 19:02:19 2021
 
 @author: jsalm
 """
-
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -15,10 +14,15 @@ from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score, train_test_split, learning_curve, GridSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, LabelEncoder
-from sklearn.metrics import confusion_matrix, auc, roc_curve, roc_auc_score
+from sklearn.metrics import plot_confusion_matrix, auc, roc_curve, roc_auc_score, accuracy_score, classification_report
 from sklearn.decomposition import PCA
 from skimage.feature import hog
+#work on implementing gradient boosting classifier 
 from sklearn.ensemble import GradientBoostingClassifier
+
+import pandas as pd
+import xgboost as xgb
+from xgboost import XGBClassifier
 
 import SVM
 import Filters
@@ -100,9 +104,11 @@ for gen in im_dir.open_dir(im_list):
     break
 
 print('done')
-#adding in some refence numbers for later
+#adding in some reference numbers for later
 y = np.vstack([y,np.arange(0,len(y),1)]).T
 #split dataset
+transformer = RobustScaler().fit(X)
+X = transformer.transform(X)
 
 print('Splitting dataset...')
 X_train, X_test, y_train, y_test = train_test_split(X,y,
@@ -121,10 +127,60 @@ print("y_train: " + str(np.unique(y_train)))
 print("y_test: " + str(np.unique(y_test)))
 
 
-
+### SKLEARN ALGORITHM ###
 #create SVM pipline
 #try using a GBC
-pipe_svc = make_pipeline(RobustScaler(),SVC())
+#pipe_svc = make_pipeline(RobustScaler(),())
+
+##Run XGBoost on training data set
+
+
+# clf_xgb = xgb.XGBClassifier(objective='binary:logistic', missing=None).fit(X_train, y_train,
+#                                                                            verbose=True, early_stopping_rounds=10,
+#                                                                            eval_metric='aucpr',eval_set=[(X_test, y_test)])
+
+##XGBoost HyperParameter Tuning
+model = XGBClassifier(max_depth = 2,subsample = 0.4,n_estimators = 150,colsample_bylevel = 1, colsample_bytree = 0.5,learning_rate=0.1, min_child_weight = 1,random_state = 0,reg_alpha = 1,reg_lambda = 0.5)
+model.fit(X_train,y_train)
+y_predict = model.predict(X_test)
+y_train_predict = model.predict(X_train)
+print('Train accuracy',accuracy_score(y_train, y_train_predict))
+print('Test accuracy',accuracy_score(y_test,y_predict))
+print(accuracy_score(y_test,y_predict))
+print(classification_report(y_test,y_predict))
+
+##Run XGBoost on testing data set and create confusion matrix
+plot_confusion_matrix(model,X_test,y_test,values_format='d',display_labels=['Positive?,Negative?'])
+plt.xlabel('Predicted label')
+plt.ylabel('True label')
+
+# from sklearn.impute import SimpleImputer
+# imputer = SimpleImputer(missing_values=numpy.nan, strategy='mean')
+
+# my_imputer = Imputer()
+# train_X = my_imputer.fit_transform(train_X)
+# test_X = my_imputer.transform(test_X)
+
+# from xgboost import XGBRegressor
+
+# my_model = XGBRegressor()
+# # Add silent=True to avoid printing out updates with each cycle
+# my_model.fit(train_X, train_y, verbose=False)
+
+# # make predictions
+# predictions = my_model.predict(test_X)
+
+# from sklearn.metrics import mean_absolute_error
+# print("Mean Absolute Error : " + str(mean_absolute_error(predictions, test_y)))
+
+# #PARAMETERS
+# my_model = XGBRegressor(n_estimators=1000)
+# my_model.fit(train_X, train_y, early_stopping_rounds=5, 
+#               eval_set=[(test_X, test_y)], verbose=False)
+
+# my_model = XGBRegressor(n_estimators=1000, learning_rate=0.05)
+# my_model.fit(train_X, train_y, early_stopping_rounds=5, 
+#               eval_set=[(test_X, test_y)], verbose=False)
 
 #SVM MODEL FITTING
 #we create an instance of SVM and fit out data.
@@ -175,7 +231,6 @@ print(pipe_svc.score(X_test,y_test))
 
 ### DATA PROCESSING IMAGE 2 ###
 #pick a test image
-# os.chdir(r'C:\Users\jsalm\Documents\Python Scripts\SVM_7232020')
 Test_im = np.array(cv2.imread("images_5HT/injured 60s_sectioned_CH2.tif")[:,:,2]/255).astype(np.float32)
 
 #extract features
