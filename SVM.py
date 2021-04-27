@@ -417,6 +417,32 @@ def gen_mask(image):
     return np.ma.masked_where(~mask, mask)
 
 def overlay_predictions(image,boolim,preds,y_test,ind_test,f,**kwargs):
+    """
+    
+
+    Parameters
+    ----------
+    image : np.array(float64)
+        image being anlazyed
+    boolim : np.array(bool)
+        label data that was used to train algorithm
+    preds : np.
+        DESCRIPTION.
+    y_test : TYPE
+        DESCRIPTION.
+    ind_test : TYPE
+        DESCRIPTION.
+    f : TYPE
+        DESCRIPTION.
+    **kwargs : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    int
+        DESCRIPTION.
+
+    """
     nH= image.shape[0]
     nW= image.shape[1]
     pred_im = np.zeros((nH,nW)).astype(np.float32)
