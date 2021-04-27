@@ -54,10 +54,14 @@ param_grid2 = [{'svc__C': param_range2_C,
                 'svc__decision_function_shape':['ovo','ovr'],
                 'svc__kernel':['rbf']},
                 {'svc__C': param_range2_C,
-                 'svc__gamma':param_range2_ga,
-                 'svc__kernel':['poly'],
-                 'svc__decision_function_shape':['ovo','ovr'],
-                 'svc__degree':deg_range2}]
+                  'svc__gamma':param_range2_ga,
+                  'svc__kernel':['poly'],
+                  'svc__decision_function_shape':['ovo','ovr'],
+                  'svc__degree':deg_range2}]
+# param_grid2 = [{'svc__C': param_range2_C,
+#                 'svc__gamma':param_range2_ga,
+#                 'svc__decision_function_shape':['ovo','ovr'],
+#                 'svc__kernel':['rbf']}]
 # param_grid3 = [{'svc__C': poly_range_C,
 #                 'svc__gamma':poly_range_ga,
 #                 'svc__kernel':['poly'],
@@ -132,21 +136,21 @@ pipe_svc = make_pipeline(RobustScaler(),SVC())
 
 #SVM MODEL FITTING
 #we create an instance of SVM and fit out data.
-# print("starting modeling career...")
+print("starting modeling career...")
 
-# gs = GridSearchCV(estimator = pipe_svc,
-#                   param_grid = param_grid2,
-#                   scoring = 'roc_auc',
-#                   cv = 5,
-#                   n_jobs = -1,
-#                   verbose = 10)
+gs = GridSearchCV(estimator = pipe_svc,
+                  param_grid = param_grid2,
+                  scoring = 'roc_auc',
+                  cv = 5,
+                  n_jobs = -1,
+                  verbose = 10)
 
 
-# print("Fitting...")
-# gs = gs.fit(X_train,y_train)
-# print('best score: ' + str(gs.best_score_))
-# print(gs.best_params_)
-# pipe_svc = gs.best_estimator_
+print("Fitting...")
+gs = gs.fit(X_train,y_train)
+print('best score: ' + str(gs.best_score_))
+print(gs.best_params_)
+pipe_svc = gs.best_estimator_
 ### END Gridsearch ####
 
 ### Setting Parameters ###
@@ -154,12 +158,12 @@ print('fitting...')
 #{'svc__C': 100, 'svc__gamma': 0.001, 'svc__kernel': 'rbf'} (~0.72% f1_score)
 #{svc__C=130, svc__decision_function_shape=ovr, svc__gamma=0.0005, svc__kernel=rbf}
 
-pipe_svc.set_params(svc__C =  100, 
-                    svc__gamma = 0.0005, 
-                    svc__kernel =  'rbf',
-                    svc__probability = True,
-                    svc__shrinking = False,
-                    svc__decision_function_shape = 'ovr')
+# pipe_svc.set_params(svc__C =  100, 
+#                     svc__gamma = 0.0005, 
+#                     svc__kernel =  'rbf',
+#                     svc__probability = True,
+#                     svc__shrinking = False,
+#                     svc__decision_function_shape = 'ovr')
 
 ### Cross Validate ###
 scores = cross_val_score(estimator = pipe_svc,
