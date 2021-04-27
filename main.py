@@ -25,7 +25,11 @@ import Filters
 import ML_interface_SVM_V3
 import DataManager
 
+dirname = os.path.dirname(__file__)
+save_bin = os.path.join(dirname,"save_bin")
 
+def robust_save(fname):
+    plt.savefig(os.path.join(save_bin,'overlayed_predictions.png',dpi=200,bbox_inches='tight'))
 ####PARAMS####
 # param_range = [0.0001,0.001,0.01,0.1,1,10,100,1000]
 # param_range= np.arange(0.01,1,0.001)
@@ -150,7 +154,7 @@ print('fitting...')
 #{'svc__C': 100, 'svc__gamma': 0.001, 'svc__kernel': 'rbf'} (~0.72% f1_score)
 #{svc__C=130, svc__decision_function_shape=ovr, svc__gamma=0.0005, svc__kernel=rbf}
 
-pipe_svc.set_params(svc__C =  130, 
+pipe_svc.set_params(svc__C =  100, 
                     svc__gamma = 0.0005, 
                     svc__kernel =  'rbf',
                     svc__probability = True,
@@ -162,6 +166,7 @@ scores = cross_val_score(estimator = pipe_svc,
                           X = X_train,
                           y = y_train,
                           cv = 10,
+                          scoring = 'roc_auc',
                           verbose = True,
                           n_jobs=-1)
 
@@ -200,7 +205,7 @@ plt.xlabel('Predicted label')
 plt.ylabel('True label')
 
 plt.tight_layout()
-#plt.savefig('images/06_09.png', dpi=300)
+plt.savefig(os.path.join(save_bin,'confussion_matrix.png'),dpi=200,bbox_inches='tight')
 plt.show()
 
 ### ROC Curve ###
@@ -210,6 +215,7 @@ roc_auc = auc(fpr, tpr)
 
 plt.figure()
 lw = 2
+
 plt.plot(fpr, tpr, color='darkorange',
          lw=lw, label='ROC curve (area = %0.2f)' % roc_auc)
 plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
@@ -220,7 +226,7 @@ plt.ylabel('True Positive Rate')
 plt.title('Receiver operating characteristic example')
 plt.legend(loc="lower right")
 plt.show()
-
+plt.savefig(os.path.join(save_bin,'roc_auc_curve.png'),dpi=200,bbox_inches='tight')
 # #PLOT IMAGES
 # # Filters.imshow_overlay(Test_im,predict_im,'predictions2',True)
 

@@ -20,6 +20,7 @@ from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import PCA
 from skimage.feature import hog
 from matplotlib.colors import ListedColormap
+from matplotlib.patches import Patch, Rectangle
 
 import cv2
 import os
@@ -35,6 +36,9 @@ from IPython import get_ipython
 plt.rcParams['figure.dpi'] = 100
 plt.rcParams['figure.figsize'] = (10,10)
 get_ipython().run_line_magic('matplotlib','qt5')
+
+dirname = os.path.dirname(__file__)
+save_bin = os.path.join(dirname,"save_bin")
 
 global data,labels
 
@@ -419,9 +423,12 @@ def overlay_predictions(image,boolim,preds,y_test,ind_test,f,**kwargs):
     # true_im = np.zeros((nH,nW)).astype(np.float32)
     
     
-    plt.figure("Overlayed Predictions for Test Domain")  
+    plt.figure("Overlayed Predictions for Test Domain",figsize = (nH/100,nW/100))  
     plt.imshow(image, **kwargs)
-    
+    legend_ele = [Rectangle((0, 0), 1, 1, fc="w", fill=False, edgecolor='none', linewidth=0,label = "label: (actual,predict)"),
+                  Patch(facecolor = "red",label = "segmented"),
+                  Patch(facecolor = "orange",label = "training data")]
+    # plt.set_size_inches(nH/100,nW/100)
     for ind in range(0,len(ind_test)):
         i = ind_test[ind]
         y1 = f[i][0].start
@@ -429,17 +436,15 @@ def overlay_predictions(image,boolim,preds,y_test,ind_test,f,**kwargs):
         x1 = f[i][1].start
         x2 = f[i][1].stop
         pred_im[y1:y2,x1:x2] = np.ones((y2-y1,x2-x1))
-        s = "y_true: {} and prediction: {}".format(y_test[ind],preds[ind])
+        s = "({0},{1})".format(y_test[ind],preds[ind])
         plt.text(x1, y1-5, s, fontsize = 10, bbox=dict(fill=False, edgecolor='none', linewidth=2))
-    
+    plt.legend(handles = legend_ele, loc = 'lower right')
 
     
     plt.imshow(gen_mask(pred_im), alpha=0.3, cmap=ListedColormap(['red']))
-    plt.imshow(gen_mask(boolim), alpha=0.7, cmap=ListedColormap(['orange']))
-    
-    'end for'
-    
-    
+    plt.imshow(gen_mask(boolim), alpha=0.5, cmap=ListedColormap(['orange']))
+    plt.savefig(os.path.join(save_bin,'overlayed_predictions.tif'),dpi=200,bbox_inches='tight')
+    return 0
 
 import random
 
