@@ -138,19 +138,19 @@ pipe_svc = make_pipeline(RobustScaler(),SVC())
 #we create an instance of SVM and fit out data.
 print("starting modeling career...")
 
-gs = GridSearchCV(estimator = pipe_svc,
-                  param_grid = param_grid2,
-                  scoring = 'roc_auc',
-                  cv = 5,
-                  n_jobs = -1,
-                  verbose = 10)
+# gs = GridSearchCV(estimator = pipe_svc,
+#                   param_grid = param_grid2,
+#                   scoring = 'roc_auc',
+#                   cv = 5,
+#                   n_jobs = -1,
+#                   verbose = 10)
 
 
-print("Fitting...")
-gs = gs.fit(X_train,y_train)
-print('best score: ' + str(gs.best_score_))
-print(gs.best_params_)
-pipe_svc = gs.best_estimator_
+# print("Fitting...")
+# gs = gs.fit(X_train,y_train)
+# print('best score: ' + str(gs.best_score_))
+# print(gs.best_params_)
+# pipe_svc = gs.best_estimator_
 ### END Gridsearch ####
 
 ### Setting Parameters ###
@@ -158,12 +158,12 @@ print('fitting...')
 #{'svc__C': 100, 'svc__gamma': 0.001, 'svc__kernel': 'rbf'} (~0.72% f1_score)
 #{svc__C=130, svc__decision_function_shape=ovr, svc__gamma=0.0005, svc__kernel=rbf}
 
-# pipe_svc.set_params(svc__C =  100, 
-#                     svc__gamma = 0.0005, 
-#                     svc__kernel =  'rbf',
-#                     svc__probability = True,
-#                     svc__shrinking = False,
-#                     svc__decision_function_shape = 'ovr')
+pipe_svc.set_params(svc__C =  130, 
+                    svc__gamma = 0.0005, 
+                    svc__kernel =  'rbf',
+                    svc__probability = True,
+                    svc__shrinking = False,
+                    svc__decision_function_shape = 'ovr')
 
 ### Cross Validate ###
 scores = cross_val_score(estimator = pipe_svc,
@@ -215,6 +215,8 @@ plt.show()
 ### ROC Curve ###
 fpr, tpr,_ = roc_curve(y_test, y_score)
 roc_auc = auc(fpr, tpr)
+SVM.write_auc(fpr,tpr)
+#fpr,tpr,roc_auc = SVM.read_auc()
 
 
 plt.figure()

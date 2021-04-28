@@ -16,7 +16,7 @@ from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score, train_test_split, learning_curve, GridSearchCV
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler, LabelEncoder
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix,auc
 from sklearn.decomposition import PCA
 from skimage.feature import hog
 from matplotlib.colors import ListedColormap
@@ -25,6 +25,7 @@ from matplotlib.patches import Patch, Rectangle
 import cv2
 import os
 import time
+import csv
 
 import Filters
 import DataManager
@@ -471,6 +472,29 @@ def overlay_predictions(image,boolim,preds,y_test,ind_test,f,**kwargs):
     plt.imshow(gen_mask(boolim), alpha=0.5, cmap=ListedColormap(['orange']))
     plt.savefig(os.path.join(save_bin,'overlayed_predictions.tif'),dpi=200,bbox_inches='tight')
     return 0
+
+def write_auc(fpr,tpr):
+    with open(os.path.join(dirname,'save_bin\\svm_auc_roc.csv'),'w',newline='') as csvfile:
+        spamwriter = csv.writer(csvfile,delimiter=' ',
+                                quotechar='|',quoting=csv.QUOTE_MINIMAL)
+        for i in range(len(fpr)):
+            spamwriter.writerow([fpr[i],tpr[i]])
+    return 0
+    
+def read_auc():
+    fpr = []
+    tpr = []
+    with open(os.path.join(dirname,'save_bin/svm_auc_roc.csv'),'r',newline='') as csvfile:
+        spamreader = csv.reader(csvfile,delimiter=' ',
+                                quotechar='|')
+        for row in spamreader:
+            fpr.append(float(row[0]))
+            tpr.append(float(row[1]))
+        
+    fpr = np.array(fpr)
+    tpr = np.array(tpr)
+    roc_auc = auc(fpr, tpr)
+    return fpr,tpr,roc_auc
 
 import random
 
